@@ -26,11 +26,20 @@ jobs:
         gradle-version: '8.4'
         cache-disabled: true
 
-    - name: Build APK with Gradle
-      run: gradle :app:assembleDebug
+    - name: Build Release APK
+      run: gradle :app:assembleRelease
+
+    - name: Sign APK with Static AOSP Key
+      run: |
+        # Download permanent static keys
+        wget https://raw.githubusercontent.com/aosp-mirror/platform_build/master/target/product/security/testkey.x509.pem
+        wget https://raw.githubusercontent.com/aosp-mirror/platform_build/master/target/product/security/testkey.pk8
+        # Find the Android build tools and sign the APK
+        BUILD_TOOLS_PATH=$(ls -d $ANDROID_HOME/build-tools/* | sort -V | tail -n 1)
+        $BUILD_TOOLS_PATH/apksigner sign --key testkey.pk8 --cert testkey.x509.pem --in app/build/outputs/apk/release/app-release-unsigned.apk --out app/build/outputs/apk/release/BrightWallpaperFix-Updatable.apk
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: BrightWallpaperFix-APK
-        path: app/build/outputs/apk/debug/app-debug.apk
+        path: app/build/outputs/apk/release/BrightWallpaperFix-Updatable.apk
