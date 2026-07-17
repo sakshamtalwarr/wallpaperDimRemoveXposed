@@ -14,26 +14,21 @@ public class ScrimHook implements IXposedHookLoadPackage {
         }
 
         try {
-            // Target the ScrimController to force transparency
+            // Target the ScrimController
             Class<?> scrimController = XposedHelpers.findClass(
                 "com.android.systemui.statusbar.phone.ScrimController", 
                 lpparam.classLoader
             );
             
-            // Hook EVERY method that could possibly set the scrim alpha
+            // Hook the method that applies the dimming alpha
             XposedBridge.hookAllMethods(scrimController, "setScrimAlpha", new XC_MethodHook() {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                    // Force the alpha to 0.0, which means 100% transparent/no dimming
-                    param.args[param.args.length - 1] = 0.0f;
-                }
-            });
-
-            // Additional hook to catch state changes
-            XposedBridge.hookAllMethods(scrimController, "applyInternalResources", new XC_MethodHook() {
-                @Override
-                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                    param.setResult(null); 
+                    // Force the alpha value to 0.0 (completely transparent)
+                    // The argument for alpha is typically the last float in the method signature
+                    if (param.args.length > 0) {
+                        param.args[param.args.length - 1] = 0.0f;
+                    }
                 }
             });
 
