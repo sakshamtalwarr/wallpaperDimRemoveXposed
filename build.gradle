@@ -1,0 +1,26 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.saksham.undimwallpaper'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.saksham.undimwallpaper"
+        minSdk 28
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    // Xposed API provided by the system at runtime
+    compileOnly 'de.robv.android.xposed:api:82'
+}

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:allowBackup="true"
+        android:label="Bright Wallpaper Fix"
+        android:supportsRtl="true"
+        android:theme="@android:style/Theme.DeviceDefault.Light">
+
+        <!-- Tell LSPosed this is a module -->
+        <meta-data
+            android:name="xposedmodule"
+            android:value="true" />
+            
+        <!-- Module Description -->
+        <meta-data
+            android:name="xposeddescription"
+            android:value="Prevents SystemUI scrim dimming when Battery Saver is enabled." />
+            
+        <!-- Minimum API version for Xposed -->
+        <meta-data
+            android:name="xposedminversion"
+            android:value="93" />
+
+    </application>
+
+</manifest>
