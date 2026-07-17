@@ -1,5 +1,8 @@
 package com.saksham.undimwallpaper;
 
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.view.View;
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XposedBridge;
@@ -9,14 +12,13 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 public class ScrimHook implements IXposedHookLoadPackage {
     @Override
     public void handleLoadPackage(LoadPackageParam lpparam) throws Throwable {
-        // We only want to modify SystemUI
         if (!lpparam.packageName.equals("com.android.systemui")) {
             return;
         }
 
         try {
             // ==========================================
-            // FIX 1: Prevent Wallpaper Dimming (Scrims)
+            // FIX 1: Prevent Wallpaper Dimming
             // ==========================================
             Class<?> scrimController = XposedHelpers.findClass(
                 "com.android.systemui.statusbar.phone.ScrimController", 
@@ -35,19 +37,29 @@ public class ScrimHook implements IXposedHookLoadPackage {
             });
 
             // ==========================================
-            // FIX 2: Force Notification Blur (Translucency)
+            // FIX 2: Force Translucent Notification Background
             // ==========================================
-            Class<?> blurListeners = XposedHelpers.findClassIfExists(
-                "android.view.CrossWindowBlurListeners", 
+            Class<?> notificationPanel = XposedHelpers.findClassIfExists(
+                "com.android.systemui.qs.QSPanelBackground", 
                 lpparam.classLoader
             );
             
-            if (blurListeners != null) {
-                XposedBridge.hookAllMethods(blurListeners, "isCrossWindowBlurEnabled", new XC_MethodHook() {
+            if (notificationPanel == null) {
+                // Fallback for different Pixel framework structures
+                notificationPanel = XposedHelpers.findClassIfExists(
+                    "com.android.systemui.qs.QSContainerImpl", 
+                    lpparam.classLoader
+                );
+            }
+
+            if (notificationPanel != null) {
+                XposedBridge.hookAllMethods(notificationPanel, "updateBackground", new XC_MethodHook() {
                     @Override
-                    protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                        // Intercept the check and force Android to keep blurs turned ON
-                        param.setResult(true); 
+                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                        View view = (View) param.thisObject;
+                        // Force a 75% transparent dark background instead of solid opaque
+                        int translucentDark = Color.argb(190, 20, 20, 20); 
+                        view.setBackground(new ColorDrawable(translucentDark));
                     }
                 });
             }
